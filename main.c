@@ -10,15 +10,57 @@ union Item {
 
 #include "linkedlist.h"
 
-LinkedList *cells, *loops;
+void usage(char *executable) {
+	fprintf(stderr,
+		"Usage: %s [OPTION] [FILE]\n"
+		"Run brainfuck code.\n\n"
+		"OPTIONS:\n"
+		" -h               print usage\n"
+		" -c cmd           program passed in as string\n",
+		executable
+	);
+}
 
-char content[] = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";
+size_t fsize(FILE *file) {
+	size_t offset = ftell(file);
+	fseek(file, 0, SEEK_END);
+	size_t size = ftell(file);
 
-int main(void) {
-	cells = linkedlist_new();
-	loops = linkedlist_new();
+	fseek(file, offset, SEEK_SET);
+	return size;
+}
 
-	for (char *i = content; *i; i++) {
+int main(int argc, char *argv[]) {
+	if (argc <= 1) {
+		usage(argv[0]);
+		return 1;
+	}
+
+	char *contents = NULL;
+	for (int i = 0; i < argc; i++) {
+		char *arg = argv[i];
+
+		if (strcmp("-c", arg) == 0) {
+			contents = argv[++i];
+		} else if (strcmp("-h", arg) == 0 || strcmp("--help", arg) == 0) {
+			usage(argv[0]);
+			return 0;
+		}
+	}
+
+	if (!contents) {
+		FILE *file = fopen(argv[1], "r");
+		size_t file_size = fsize(file);
+
+		contents = malloc(file_size);
+		fread(contents, 1, file_size, file);
+
+		fclose(file);
+	}
+
+	LinkedList *cells = linkedlist_new(), *loops = linkedlist_new();
+
+	for (char *i = contents; *i; i++) {
 		switch (*i) {
 			case '.':
 				printf("%c", cells->item.cell);
