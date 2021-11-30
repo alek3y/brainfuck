@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
 union Item {
 	unsigned char cell;
@@ -9,12 +10,13 @@ union Item {
 
 #include "linkedlist.h"
 
-LinkedList *cells = NULL;
+LinkedList *cells, *loops;
 
-char content[] = "++.";
+char content[] = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";
 
 int main(void) {
 	cells = linkedlist_new();
+	loops = linkedlist_new();
 
 	for (char *i = content; *i; i++) {
 		switch (*i) {
@@ -38,6 +40,25 @@ int main(void) {
 					linkedlist_prepend(cells);
 				}
 				cells = cells->previous;
+				break;
+			case '[':
+				if (cells->item.cell == 0) {
+					i = strstr(i, "]");
+				} else {
+					linkedlist_append(loops);
+					loops = loops->next;
+					loops->item.loop = i;
+				}
+				break;
+			case ']':
+				if (cells->item.cell != 0) {
+					i = loops->item.loop;
+				} else {
+					LinkedList *last = loops->previous;
+					linkedlist_pop(loops);
+					free(loops);
+					loops = last;
+				}
 				break;
 		}
 	}
