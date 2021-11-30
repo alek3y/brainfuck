@@ -85,7 +85,22 @@ int main(int argc, char *argv[]) {
 				break;
 			case '[':
 				if (cells->item.cell == 0) {
-					i = strstr(i, "]");
+					size_t opened = 0;
+					for (char *j = i; *j; j++) {
+						switch (*j) {
+							case '[':
+								opened++;
+								break;
+							case ']':
+								opened--;
+								break;
+						}
+
+						if (opened == 0) {
+							i = j;
+							break;
+						}
+					}
 				} else {
 					linkedlist_append(loops);
 					loops = loops->next;
