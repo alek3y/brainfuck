@@ -65,6 +65,9 @@ int main(int argc, char *argv[]) {
 			case '.':
 				printf("%c", cells->item.cell);
 				break;
+			case ',':
+				cells->item.cell = getchar();
+				break;
 			case '+':
 				cells->item.cell++;
 				break;
